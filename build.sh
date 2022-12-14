@@ -1,10 +1,21 @@
 #!/bin/bash 
 
-# pandoc version 1.xx
-# -N: 每個section加上編號
-# --toc: 加上目錄
-pandoc --latex-engine=xelatex --template=kaka-template-ubuntu --from markdown --listings --toc -N <file name>.md -o <file name>.pdf
+ROOT=$(pwd)
+md=""
+pdf=""
 
-# pandoc version 2.xx
-#pandoc --pdf-engine=xelatex --template=kaka-template-<Mac or Ubuntu> --from markdown -Mlistings --toc -N <your file>.md -o <file name>.pdf
+if [[ -z $1 ]]; then
+    md="README.md"
+else
+    md=$1
+fi
+
+pdf="${md[@]:0:${#md}-3}.pdf"
+
+docker run --rm \
+    --volume "`pwd`:/data" \
+    --user `id -u`:`id -g` \
+    kakalin/pandoc:2.19_textlive --pdf-engine=xelatex \
+    --template=pm-template.tex \
+    $md -o $pdf
 
