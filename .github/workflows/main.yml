@@ -1,0 +1,54 @@
+on: [push]
+
+jobs:
+  check:
+    name: Check if need to rebuild image
+    outputs:
+      need_rebuild_image: ${{ steps.check_files.outputs.need_rebuild_image }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: check modified files
+        id: check_files
+        run: |
+          echo "=============== list modified files ==============="
+          git diff --name-only HEAD^ HEAD
+          
+          echo "========== check paths of modified files =========="
+          git diff --name-only HEAD^ HEAD > files.txt
+          
+          while IFS= read -r line
+          do
+            echo $line
+            if [[ $line = docker/* ]] || [[ $line = actions/* ]]; then
+              echo "::set-output name=need_rebuild_image::true"
+              break
+            fi
+          done < files.txt
+
+  build-and-push:
+    name: Build pandoc image and push
+    needs: check
+    if: ${{ needs.check.outputs.need_rebuild_image == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with: 
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./docker
+          file: ./docker/Dockerfile
+          push: true
+          tags: ghcr.io/kaka-lin/pandoc-docker/pandoc:2.19_textlive
