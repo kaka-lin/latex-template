@@ -30,7 +30,9 @@ RUN apt-get update && \
     fonts-noto-extra \
     fonts-noto-mono \
     fonts-arphic-uming \
-    fonts-ubuntu
+    fonts-ubuntu \
+    # wkhtmltopdf
+    wkhtmltopdf 
 
 RUN apt-get -y autoremove && \
     apt-get -y autoclean && \
