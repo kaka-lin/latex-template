@@ -16,6 +16,7 @@ docker run --rm \
     --volume "`pwd`:/data" \
     --user `id -u`:`id -g` \
     kakalin/pandoc:2.19_textlive --pdf-engine=xelatex \
-    --template=pm-template.tex \
+    --template=eisvogel.tex \
+    --listings \
     $md -o $pdf
 

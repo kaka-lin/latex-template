@@ -1,4 +1,6 @@
-# LaTex Template
+# Pandoc Docker 
+
+Including LaTex Template
 
 ## Usage
 
